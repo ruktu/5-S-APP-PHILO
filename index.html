@@ -407,10 +407,12 @@
                 width: 0 !important;
                 padding: 0;
             }
-            .btn-toggle-sidebar-mobile {
-                display: block !important;
-            }
         }
+        /* La visibilidad de .btn-toggle-sidebar-mobile la controla el JS
+           (toggleSidebar()/checkSession()) con estilos inline — antes había
+           una regla "display:block !important" aquí que la dejaba SIEMPRE
+           visible en móvil (incluso con el menú ya abierto, superpuesta
+           encima), sin que el JS pudiera esconderla nunca. */
 
         /* Fondo oscuro detrás de la sidebar cuando está abierta en móvil;
            tocarlo la cierra (toggleSidebar), igual que un modal. */
@@ -1995,14 +1997,6 @@
                 </div>
             </nav>
 
-            <div style="margin-top: auto; padding-bottom: 20px;">
-                <nav class="sidebar-nav">
-                    <a class="nav-item" style="color: #EC7063;" onclick="handleLogout()">
-                        <span class="nav-icon">🚪</span>
-                        <span>Cerrar Sesión</span>
-                    </a>
-                </nav>
-            </div>
         </aside>
 
         <!-- CONTENEDOR OCULTO PARA HTML2CANVAS -->
@@ -2962,7 +2956,9 @@
                 btnMobile.style.display = 'block';
                 if (backdrop) backdrop.classList.remove('visible');
             } else {
-                btnMobile.style.display = ''; // Permitir que la media query lo esconda
+                // Explícito 'none' (no ''): sin esto el botón flotante de
+                // abrir menú se quedaba visible ENCIMA del menú ya abierto.
+                btnMobile.style.display = 'none';
                 if (backdrop && window.innerWidth <= 1100) backdrop.classList.add('visible');
             }
         }
@@ -6832,6 +6828,8 @@
             if (window.innerWidth <= 1100) {
                 const sb = document.querySelector('.sidebar');
                 if (sb) sb.classList.add('collapsed');
+                const btnMobile = document.querySelector('.btn-toggle-sidebar-mobile');
+                if (btnMobile) btnMobile.style.display = 'block';
             }
 
             // MODO GEMBA ABIERTO: Bypass temporal de login
@@ -8463,6 +8461,12 @@
             document.getElementById('view-gemba-dashboard').classList.add('hidden');
             document.getElementById('view-gemba-participant').classList.remove('hidden');
             document.querySelector('.sidebar').classList.add('collapsed'); // Ocultar sidebar en móvil
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (backdrop) backdrop.classList.remove('visible');
+            if (window.innerWidth <= 1100) {
+                const btnMobile = document.querySelector('.btn-toggle-sidebar-mobile');
+                if (btnMobile) btnMobile.style.display = 'block';
+            }
             document.getElementById('gemba-mobile-join').classList.remove('hidden');
             document.getElementById('gemba-mobile-waiting').classList.add('hidden');
             document.getElementById('gemba-mobile-active').classList.add('hidden');
