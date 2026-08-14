@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: flex-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./instance/postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - flex-internal
+
+  backend:
+    build: ./backend
+    container_name: flex-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    volumes:
+      - ./instance/uploads:/app/instance/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - flex-internal
+
+  flex-nginx:
+    image: nginx:alpine
+    container_name: flex-nginx
+    restart: unless-stopped
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./iconos:/usr/share/nginx/html/iconos:ro
+      - ./B27.png:/usr/share/nginx/html/B27.png:ro
+      - ./B29.png:/usr/share/nginx/html/B29.png:ro
+      - ./fondo.webp:/usr/share/nginx/html/fondo.webp:ro
+      - ./ppa.csv:/usr/share/nginx/html/ppa.csv:ro
+      - ./flex_logo.png:/usr/share/nginx/html/flex_logo.png:ro
+      - ./iconos.webp:/usr/share/nginx/html/iconos.webp:ro
+      - "./plantilla de comunicados.png:/usr/share/nginx/html/plantilla de comunicados.png:ro"
+      - ./instance/uploads/evidence:/usr/share/nginx/html/evidence:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - backend
+    networks:
+      - flex-internal
+      - ruktu
+
+networks:
+  flex-internal:
+    driver: bridge
+  ruktu:
+    external: true
+    name: ruktucom_ruktu
