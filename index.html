@@ -334,7 +334,7 @@
             margin-bottom: 15px;
             border: 1px solid var(--color-border);
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px; /* <16px dispara zoom automático al enfocar en iOS Safari */
             font-family: var(--font-family);
         }
         .login-input:focus {
@@ -411,7 +411,20 @@
                 display: block !important;
             }
         }
-        
+
+        /* Fondo oscuro detrás de la sidebar cuando está abierta en móvil;
+           tocarlo la cierra (toggleSidebar), igual que un modal. */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9997;
+        }
+        .sidebar-backdrop.visible {
+            display: block;
+        }
+
         .sidebar-header {
             padding: 0 24px 24px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -463,7 +476,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
+            padding: 14px 16px;
             border-radius: 8px;
             color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
@@ -787,6 +800,43 @@
             }
         }
 
+        /* --- AJUSTES FINOS PARA TELÉFONOS --- */
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 15px;
+            }
+            .header {
+                padding: 16px;
+            }
+            .chart-header {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .gemba-2col-grid {
+                grid-template-columns: 1fr !important;
+            }
+            /* El calendario mantiene columnas legibles y desliza en vez de aplastarse */
+            .calendar-grid-scroll {
+                overflow-x: auto;
+            }
+            .calendar-grid {
+                min-width: 520px;
+            }
+            /* El botón "+" del calendario depende de :hover, que no existe
+               de forma confiable en touch — en teléfono queda siempre visible. */
+            .cal-add-btn {
+                opacity: 1;
+            }
+            /* El handle de redimensionar del editor de Layout es muy chico
+               para el dedo (12px) — se agranda solo en teléfono. */
+            .layout-box .resize-handle {
+                width: 22px;
+                height: 22px;
+                right: -11px;
+                bottom: -11px;
+            }
+        }
+
         .chart-card {
             background-color: var(--color-bg-white);
             border-radius: var(--border-radius);
@@ -915,7 +965,7 @@
             border-radius: var(--border-radius);
             border: 1px solid var(--color-border);
             font-family: var(--font-family);
-            font-size: 13px;
+            font-size: 16px; /* <16px dispara zoom automático al enfocar en iOS Safari */
             background-color: var(--color-bg-white);
             cursor: pointer;
             min-width: 180px;
@@ -932,6 +982,14 @@
             overflow-x: auto;
             border: 1px solid var(--color-border);
             border-radius: var(--border-radius);
+        }
+
+        /* Usada por la tabla del Muro del Gemba — sin esta regla no tenía
+           NINGÚN manejo de overflow, así que en pantallas angostas las
+           columnas se aplastaban en vez de poder deslizarse. */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
         }
 
         table {
@@ -1138,6 +1196,8 @@
             cursor: pointer;
             color: var(--color-text-muted);
             transition: color 0.2s;
+            padding: 10px;
+            line-height: 1;
         }
         .btn-close:hover {
             color: var(--color-secondary);
@@ -1160,7 +1220,7 @@
             border: 1px solid var(--color-border);
             border-radius: 4px;
             font-family: var(--font-family);
-            font-size: 14px;
+            font-size: 16px; /* <16px dispara zoom automático al enfocar en iOS Safari */
             color: var(--color-text-main);
             background-color: var(--color-bg-white);
             transition: border-color 0.2s;
@@ -1189,7 +1249,7 @@
             border: none;
             cursor: pointer;
             color: var(--color-primary);
-            padding: 4px;
+            padding: 8px;
             border-radius: 4px;
             transition: background-color 0.2s, color 0.2s;
             display: flex;
@@ -1385,6 +1445,9 @@
             font-weight: 600;
         }
         /* ESTILOS DEL CALENDARIO 5S */
+        .calendar-grid-scroll {
+            width: 100%;
+        }
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -1688,6 +1751,12 @@
             50% { transform: translateY(-10px); }
         }
 
+        /* Usado por el spinner de la sala de espera del Gemba móvil */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .podium-racer img {
             width: 80px;
             height: 80px;
@@ -1781,8 +1850,8 @@
                 </div>
             </div>
 
-            <div style="max-height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+            <div style="max-height: 400px; overflow-y: auto; overflow-x: auto; border: 1px solid #eee; border-radius: 8px;">
+                <table style="width: 100%; min-width: 500px; border-collapse: collapse; text-align: left; font-size: 13px;">
                     <thead style="background: #f1f5f9; position: sticky; top: 0; z-index: 2;">
                         <tr>
                             <th style="padding: 10px; border-bottom: 2px solid #ccc;">ID Área</th>
@@ -1805,7 +1874,7 @@
 
     <!-- MODAL GENERADOR DE REPORTES (CANVA) -->
     <div id="report-modal" class="login-overlay" style="display: none; z-index: 9999;">
-        <div class="login-card" style="border-top: 5px solid #0284c7; min-width: 400px;">
+        <div class="login-card" style="border-top: 5px solid #0284c7;">
             <h2 style="color: #0284c7; margin-bottom: 10px;">Generador de Reportes</h2>
             <p style="margin-bottom: 20px; font-size: 14px; color: var(--color-text-muted);">Selecciona el tipo de reporte para descargar la imagen PNG.</p>
             
@@ -1835,15 +1904,17 @@
     </div>
 
     <div class="app-layout">
-        
+
         <!-- BOTÓN MÓVIL FLOTANTE (Solo visible en cel cuando barra está colapsada) -->
         <button class="btn-toggle-sidebar-mobile" onclick="toggleSidebar()" style="display: none; position: fixed; top: 15px; left: 15px; z-index: 10000; background-color: #005A9C; color: white; border: none; padding: 10px 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;" title="Abrir Menú">
             <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
         </button>
+        <!-- Fondo oscuro para cerrar la sidebar tocando afuera (solo móvil) -->
+        <div id="sidebar-backdrop" onclick="toggleSidebar()"></div>
         <!-- SIDEBAR DE NAVEGACIÓN -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <button class="btn-toggle-sidebar" onclick="toggleSidebar()" style="background:none; border:none; color:white; cursor:pointer; position: absolute; top: 0; right: 15px;" title="Minimizar Menú">
+                <button class="btn-toggle-sidebar" onclick="toggleSidebar()" style="background:none; border:none; color:white; cursor:pointer; position: absolute; top: 0; right: 8px; padding: 12px;" title="Minimizar Menú">
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
                 </button>
                 <img src="./flex_logo.png" class="sidebar-logo" alt="Flex Logo" style="width: 80px; height: auto; margin-top: 25px;" />
@@ -2164,16 +2235,18 @@
                         </div>
                     </div>
                     
-                    <div class="calendar-grid" id="calendar-grid-container">
-                        <!-- Days of week -->
-                        <div class="cal-day-header">Dom</div>
-                        <div class="cal-day-header">Lun</div>
-                        <div class="cal-day-header">Mar</div>
-                        <div class="cal-day-header">Mié</div>
-                        <div class="cal-day-header">Jue</div>
-                        <div class="cal-day-header">Vie</div>
-                        <div class="cal-day-header">Sáb</div>
-                        <!-- Days body injected via JS -->
+                    <div class="calendar-grid-scroll">
+                        <div class="calendar-grid" id="calendar-grid-container">
+                            <!-- Days of week -->
+                            <div class="cal-day-header">Dom</div>
+                            <div class="cal-day-header">Lun</div>
+                            <div class="cal-day-header">Mar</div>
+                            <div class="cal-day-header">Mié</div>
+                            <div class="cal-day-header">Jue</div>
+                            <div class="cal-day-header">Vie</div>
+                            <div class="cal-day-header">Sáb</div>
+                            <!-- Days body injected via JS -->
+                        </div>
                     </div>
                 </div>
 
@@ -2241,7 +2314,7 @@
                     
                     <main id="dashboard-content" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
                         <!-- BOTONES SUPERIORES (COMPETENCIA Y ADMIN) -->
-                        <div style="display: flex; justify-content: flex-end; gap: 15px; width: 100%; padding: 0 10px;">
+                        <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 15px; width: 100%; padding: 0 10px;">
                             <button id="btn-manage-owners" class="hidden" onclick="openManageOwnersModal()" style="background-color: #000; color: #f59e0b; border: 2px solid #f59e0b; font-weight: bold; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; display: none;">
                                 👑 GESTIONAR OWNERS
                             </button>
@@ -2676,12 +2749,12 @@
                 
                 <!-- GEMBA DASHBOARD -->
                 <div id="view-gemba-dashboard" class="hidden" style="width: 100%; display: flex; flex-direction: column; gap: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 20px;">
                         <div>
                             <h2 style="color: #005A9C; margin: 0; font-size: 28px;">Gemba Walks Dashboard</h2>
                             <p style="color: #666; margin: 5px 0 0 0;">Análisis y seguimiento de acciones derivadas exclusivamente de Gembas</p>
                         </div>
-                        <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px;">
                             <button class="btn btn-primary" onclick="openGembaParticipant()" style="font-size: 16px; padding: 12px 24px; font-weight: bold; background-color: #005A9C; border-color: #005A9C; color: white !important;">
                                 📱 Operador / Participante
                             </button>
@@ -2691,7 +2764,7 @@
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="gemba-2col-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div class="chart-container table-card">
                             <div class="chart-header">Distribución por Categoría</div>
                             <canvas id="chart-gemba-category" style="max-height: 250px;"></canvas>
@@ -2729,9 +2802,9 @@
 
                 <!-- GEMBA ADMIN VIEW -->
                 <div id="view-gemba-admin" class="hidden" style="width: 100%; display: flex; flex-direction: column; gap: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 20px;">
                         <h2 style="color: #005A9C; margin: 0; font-size: 24px;">👑 Panel de Administrador: Gemba en Vivo</h2>
-                        <div style="display: flex; gap: 10px;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                             <button class="btn" onclick="openManageOwnersModal()" style="background-color: #000; color: #f59e0b; border: 2px solid #f59e0b; font-weight: bold; padding: 8px 15px; border-radius: 5px; cursor: pointer; transition: background 0.2s;">👑 Directorio de Owners</button>
                             <button class="btn" onclick="switchTab('gemba')" style="background-color: #64748b; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">← Volver al Dashboard</button>
                         </div>
@@ -2739,7 +2812,7 @@
                     
                     <div class="table-card" style="padding: 25px;">
                         <h3 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Crear Nueva Sala Virtual</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="gemba-2col-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                             <div class="form-group" style="display: none;">
                                 <label>Fecha:</label>
                                 <input type="date" id="gemba-admin-date" class="form-control">
@@ -2773,7 +2846,7 @@
                             <p style="color: #666;">Pide a los participantes que entren desde sus celulares e ingresen este código.</p>
                         </div>
                         
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
                             <h3 style="margin: 0;">Participantes Unidos (<span id="gemba-participants-count">0</span>)</h3>
                             <button class="btn btn-secondary" onclick="assignGembaSectionsRandomly()" style="background-color: #6366f1; color: white;">🎲 Repartir Secciones al Azar</button>
                         </div>
@@ -2818,7 +2891,6 @@
                         <p style="color: #666; margin-top: 20px;">Espera a que el Administrador inicie el recorrido.</p>
                         <!-- Pequeña animación CSS inyectada -->
                         <div style="margin: 20px auto; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #005A9C; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
                     </div>
 
                     <!-- ACTIVE AUDIT -->
@@ -2883,12 +2955,15 @@
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             const btnMobile = document.querySelector('.btn-toggle-sidebar-mobile');
+            const backdrop = document.getElementById('sidebar-backdrop');
             sidebar.classList.toggle('collapsed');
-            
+
             if (sidebar.classList.contains('collapsed')) {
                 btnMobile.style.display = 'block';
+                if (backdrop) backdrop.classList.remove('visible');
             } else {
                 btnMobile.style.display = ''; // Permitir que la media query lo esconda
+                if (backdrop && window.innerWidth <= 1100) backdrop.classList.add('visible');
             }
         }
 
@@ -6039,80 +6114,111 @@
         }
 
         // --- LÓGICA DE DRAG & DROP Y RESIZE (Simplificada y en Porcentajes) ---
+        // Los handlers reciben {x,y} ya normalizado, así que la misma lógica
+        // sirve para mouse (clientX/Y) y touch (touches[0].clientX/Y) — sin
+        // esto, el editor de Layout (arrastrar/redimensionar recuadros) no
+        // funcionaba en absoluto con el dedo.
+        function eventPoint(e) {
+            if (e.touches && e.touches.length > 0) {
+                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+            return { x: e.clientX, y: e.clientY };
+        }
+
         function setupDraggable(element, boxData, index) {
             let isDragging = false;
             let startX, startY, startLeft, startTop;
 
-            element.addEventListener('mousedown', (e) => {
+            const onStart = (e) => {
                 if (e.target.classList.contains('resize-handle')) return;
                 isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
+                const p = eventPoint(e);
+                startX = p.x;
+                startY = p.y;
                 const container = element.parentElement;
                 startLeft = (parseFloat(element.style.left) / 100) * container.clientWidth;
                 startTop = (parseFloat(element.style.top) / 100) * container.clientHeight;
                 e.stopPropagation();
-            });
+            };
 
-            document.addEventListener('mousemove', (e) => {
+            const onMove = (e) => {
                 if (!isDragging) return;
+                if (e.touches) e.preventDefault(); // evita hacer scroll de la página mientras se arrastra
+                const p = eventPoint(e);
                 const container = element.parentElement;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                
+                const dx = p.x - startX;
+                const dy = p.y - startY;
+
                 let newLeft = ((startLeft + dx) / container.clientWidth) * 100;
                 let newTop = ((startTop + dy) / container.clientHeight) * 100;
-                
+
                 newLeft = Math.max(0, Math.min(newLeft, 100 - boxData.width));
                 newTop = Math.max(0, Math.min(newTop, 100 - boxData.height));
-                
+
                 element.style.left = newLeft + '%';
                 element.style.top = newTop + '%';
                 boxData.left = parseFloat(newLeft.toFixed(2));
                 boxData.top = parseFloat(newTop.toFixed(2));
-            });
+            };
 
-            document.addEventListener('mouseup', () => {
-                isDragging = false;
-            });
+            const onEnd = () => { isDragging = false; };
+
+            element.addEventListener('mousedown', onStart);
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onEnd);
+
+            element.addEventListener('touchstart', onStart, { passive: true });
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend', onEnd);
+            document.addEventListener('touchcancel', onEnd);
         }
 
         function setupResizable(resizer, element, boxData, index) {
             let isResizing = false;
             let startX, startY, startWidth, startHeight;
 
-            resizer.addEventListener('mousedown', (e) => {
+            const onStart = (e) => {
                 isResizing = true;
-                startX = e.clientX;
-                startY = e.clientY;
+                const p = eventPoint(e);
+                startX = p.x;
+                startY = p.y;
                 const container = element.parentElement;
                 startWidth = (parseFloat(element.style.width) / 100) * container.clientWidth;
                 startHeight = (parseFloat(element.style.height) / 100) * container.clientHeight;
                 e.stopPropagation();
-                e.preventDefault();
-            });
+                if (!e.touches) e.preventDefault();
+            };
 
-            document.addEventListener('mousemove', (e) => {
+            const onMove = (e) => {
                 if (!isResizing) return;
+                if (e.touches) e.preventDefault(); // evita hacer scroll de la página mientras se redimensiona
+                const p = eventPoint(e);
                 const container = element.parentElement;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                
+                const dx = p.x - startX;
+                const dy = p.y - startY;
+
                 let newWidth = ((startWidth + dx) / container.clientWidth) * 100;
                 let newHeight = ((startHeight + dy) / container.clientHeight) * 100;
-                
+
                 newWidth = Math.max(2, Math.min(newWidth, 100 - boxData.left));
                 newHeight = Math.max(2, Math.min(newHeight, 100 - boxData.top));
-                
+
                 element.style.width = newWidth + '%';
                 element.style.height = newHeight + '%';
                 boxData.width = parseFloat(newWidth.toFixed(2));
                 boxData.height = parseFloat(newHeight.toFixed(2));
-            });
+            };
 
-            document.addEventListener('mouseup', () => {
-                isResizing = false;
-            });
+            const onEnd = () => { isResizing = false; };
+
+            resizer.addEventListener('mousedown', onStart);
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onEnd);
+
+            resizer.addEventListener('touchstart', onStart, { passive: true });
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend', onEnd);
+            document.addEventListener('touchcancel', onEnd);
         }
 
         // --- CÁLCULO DE KPIs PARA LAYOUT ---
@@ -6655,6 +6761,13 @@
         }
 
         async function checkSession() {
+            // En móvil/tablet, arrancar con la sidebar cerrada (evita que
+            // tape el 70% de la pantalla al cargar por primera vez).
+            if (window.innerWidth <= 1100) {
+                const sb = document.querySelector('.sidebar');
+                if (sb) sb.classList.add('collapsed');
+            }
+
             // MODO GEMBA ABIERTO: Bypass temporal de login
             window.currentUserId = '00000000-0000-0000-0000-000000000000';
             window.currentUserRole = 'Administrador';
@@ -8523,9 +8636,9 @@
             div.innerHTML = `
                 <h4 style="margin: 0 0 10px 0; color: #dc2626;">Nueva Acción Correctiva</h4>
                 <textarea id="act-txt-${actionId}" class="form-control" rows="2" placeholder="Describe el problema y la acción..." style="margin-bottom: 10px;"></textarea>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="text" id="act-dept-${actionId}" class="form-control" list="gemba-owners-list" placeholder="Owner Responsable...">
-                    <select id="act-pri-${actionId}" class="form-control">
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="act-dept-${actionId}" class="form-control" list="gemba-owners-list" placeholder="Owner Responsable..." style="flex: 1 1 160px;">
+                    <select id="act-pri-${actionId}" class="form-control" style="flex: 1 1 160px;">
                         <option value="">Prioridad...</option>
                         <option value="Alta">Alta (36 hrs)</option>
                         <option value="Media">Media (3 días)</option>
