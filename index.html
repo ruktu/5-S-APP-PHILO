@@ -1910,7 +1910,7 @@
             <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
         </button>
         <!-- Fondo oscuro para cerrar la sidebar tocando afuera (solo móvil) -->
-        <div id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+        <div id="sidebar-backdrop"></div>
         <!-- SIDEBAR DE NAVEGACIÓN -->
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -2966,6 +2966,20 @@
                 if (backdrop && window.innerWidth <= 1100) backdrop.classList.add('visible');
             }
         }
+
+        // Cerrar la sidebar tocando/haciendo click fuera de ella (patrón
+        // estándar "click outside", más confiable entre navegadores que
+        // depender únicamente del div de fondo — este listener global es
+        // quien realmente decide, el backdrop solo aporta el oscurecido visual.
+        document.addEventListener('click', function (e) {
+            if (window.innerWidth > 1100) return;
+            const sidebar = document.querySelector('.sidebar');
+            if (!sidebar || sidebar.classList.contains('collapsed')) return;
+            const btnMobile = document.querySelector('.btn-toggle-sidebar-mobile');
+            if (sidebar.contains(e.target)) return;
+            if (btnMobile && btnMobile.contains(e.target)) return;
+            toggleSidebar();
+        }, true);
 
         function toggleNavGroup(group) {
             const content = document.getElementById('nav-group-' + group);
